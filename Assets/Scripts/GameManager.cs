@@ -2,17 +2,28 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class GameManager : MonoBehaviour {
+public class GameManager : BaseInputModule {
 
 	public List<GameObject> cards = new List<GameObject> ();
 	public int cardIdx = -1; // when I generate first card, it will be idx 0 (cardIdx += 1, line 233)
 	public GameObject card;
+	public GameObject mainReinforce;
 
 	public int luna = 0;
 	public int rubble = 0;
 
 	public bool no4tier = true;
+
+	public bool isWaitingSelect = false;
+
+	Canvas canv;
+	GraphicRaycaster gr;
+	PointerEventData ped;
+	List<RaycastResult> raycastResults;
+
+	RaycastHit hit;
 
 	Dictionary <string, int> roleList = new Dictionary<string, int> () {
 		{ "마피아", 0 },
@@ -225,7 +236,10 @@ public class GameManager : MonoBehaviour {
 	};
 	// Use this for initialization
 	void Start () {
-		//int randTier = Random.Range (5, 6 + 1);
+		canv = GameObject.Find("Canvas").GetComponent<Canvas>();
+		gr = canv.GetComponent<GraphicRaycaster> ();
+		ped = new PointerEventData (null);
+		raycastResults = new List<RaycastResult>();
 	}
 
 	void randCard (int cardTier) {
@@ -304,8 +318,33 @@ public class GameManager : MonoBehaviour {
 	}
 	// Update is called once per frame
 	void Update () {
+		if (isWaitingSelect) {
+			if (Input.GetMouseButtonDown (0)) {
+				ped.position = Input.mousePosition;
+				gr.Raycast (ped, raycastResults);
 
+				if (raycastResults.Count > 0) {
+					for (int i = 0; i < raycastResults.Count; i++) {
+						print (raycastResults [i].gameObject.name);
+					}
+					foreach (RaycastResult raycastResult in raycastResults) {
+						HandlePointerExitAndEnter(ped, raycastResult.gameObject);
+
+						if (raycastResult.gameObject.tag == "CardCollider") {
+							raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedMain = true;
+							raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
+							mainReinforce = raycastResult.gameObject.transform.parent.gameObject;
+						}
+					}
+				}
+			}
+			raycastResults.Clear ();
+		}
 	}
+
+	public override void Process() {}
+	protected override void OnEnable() {}
+	protected override void OnDisable() {}
 	public void BuyLowCard() {
 		rubble += 10000;
 		int tempTier = Random.Range (1, 1000 + 1);
@@ -396,4 +435,35 @@ public class GameManager : MonoBehaviour {
         }
         
     }
+
+	public void OnReinforce() {
+		if (!isWaitingSelect) {
+			isWaitingSelect = true;
+			for (int i = 0; i < transform.childCount; i++) {
+				transform.GetChild (i).Find ("Alpha").GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
+			}
+			GameObject.Find ("DarkEffect").GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
+			GameObject.Find ("BuyLowCard").GetComponent<Button> ().enabled = false;
+			GameObject.Find ("BuyLowCardpack").GetComponent<Button> ().enabled = false;
+			GameObject.Find ("BuyHighCard").GetComponent<Button> ().enabled = false;
+			GameObject.Find ("BuyHighCardpack").GetComponent<Button> ().enabled = false;
+			GameObject.Find ("ReinforceButton").GetComponent<Button> ().enabled = false;
+			GameObject.Find ("SortButton").GetComponent<Button> ().enabled = false;
+			GameObject.Find ("ReinforceCancelButton").GetComponent<Image> ().enabled = true;
+		}
+	}
+	public void OnReinforceCancel() {
+		isWaitingSelect = false;
+		for (int i = 0; i < transform.childCount; i++) {
+			transform.GetChild (i).Find ("Alpha").GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
+		}
+		GameObject.Find ("DarkEffect").GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
+		GameObject.Find ("BuyLowCard").GetComponent<Button> ().enabled = true;
+		GameObject.Find ("BuyLowCardpack").GetComponent<Button> ().enabled = true;
+		GameObject.Find ("BuyHighCard").GetComponent<Button> ().enabled = true;
+		GameObject.Find ("BuyHighCardpack").GetComponent<Button> ().enabled = true;
+		GameObject.Find ("ReinforceButton").GetComponent<Button> ().enabled = true;
+		GameObject.Find ("SortButton").GetComponent<Button> ().enabled = true;
+		GameObject.Find ("ReinforceCancelButton").GetComponent<Image> ().enabled = false;
+	}
 }

@@ -11,8 +11,8 @@ public class CardManager : MonoBehaviour {
 	public int exp = 0;
 	public int maxExp;
 
-	private bool receivedData = false;
-
+	public bool isSelectedMain = false;
+	public bool isSelectedSub = false;
 
 	string path;
 	// Use this for initialization
