@@ -319,7 +319,7 @@ public class GameManager : BaseInputModule {
 	// Update is called once per frame
 	void Update () {
 		if (isWaitingSelect) {
-			if (Input.GetMouseButtonDown (0)) {
+			if (Input.GetMouseButtonUp (0)) {
 				ped.position = Input.mousePosition;
 				gr.Raycast (ped, raycastResults);
 
