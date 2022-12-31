@@ -25,6 +25,10 @@ public class GameManager : BaseInputModule {
 
 	RaycastHit hit;
 
+	[SerializeField]
+	int cardCnt = 0;
+	[SerializeField]
+	int tempExp = 0;
 	Dictionary <string, int> roleList = new Dictionary<string, int> () {
 		{ "마피아", 0 },
 		{ "스파이", 1 },
@@ -251,7 +255,6 @@ public class GameManager : BaseInputModule {
 			_tiers [i] = "무능력";
 		}
 		int roleNum = Random.Range (1, 10000 + 1);
-		print (roleNum); // asfdasdf
 		if (_tier != 1) {
 			foreach (KeyValuePair<string, int> current in rolePercent) { // Gen Role
 				if (roleNum <= current.Value) {
@@ -267,7 +270,6 @@ public class GameManager : BaseInputModule {
 				for (int i = 0; i < roleTo3Tier.Count; i++) {
 					if (roleTo3Tier [i] [0] == _role) {
 						int t3rnd = Random.Range (1, roleTo3Tier [i].Count);
-						print (t3rnd + ", " + _role); //wadfasdfasdf
 						_tiers [2] = roleTo3Tier [i] [t3rnd];
 					}
 				}
@@ -288,7 +290,6 @@ public class GameManager : BaseInputModule {
 										}
 									}
 								}
-								print (t4rnd + ", " + _role);
 								_tiers [t] = roleTo4Tier [i] [t4rnd];
 							}
 						}
@@ -325,15 +326,53 @@ public class GameManager : BaseInputModule {
 
 				if (raycastResults.Count > 0) {
 					for (int i = 0; i < raycastResults.Count; i++) {
-						print (raycastResults [i].gameObject.name);
 					}
 					foreach (RaycastResult raycastResult in raycastResults) {
 						HandlePointerExitAndEnter(ped, raycastResult.gameObject);
 
 						if (raycastResult.gameObject.tag == "CardCollider") {
-							raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedMain = true;
-							raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
-							mainReinforce = raycastResult.gameObject.transform.parent.gameObject;
+							if (raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected == false) {
+								if (cardCnt == 0) {
+									cardCnt += 1;
+									print("newking");
+									mainReinforce = raycastResult.gameObject.transform.parent.gameObject;
+									raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedMain = true;
+									raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = true;
+									raycastResult.gameObject.transform.parent.Find ("SelectedFrame").GetComponent<Image> ().enabled = true;
+									raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
+								}
+								else {
+									if (mainReinforce.GetComponent<CardManager> ().maxExp - (mainReinforce.GetComponent<CardManager> ().exp + tempExp) > 0) {
+										cardCnt += 1;
+										print("newzeryo");
+										raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedSub = true;
+										raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = true;
+										tempExp += raycastResult.gameObject.GetComponentInParent<CardManager> ().maxExp / 4;
+										raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
+									} else {
+										print ("cant add");
+									}
+								}
+							}
+							else {
+								if (cardCnt == 1) {
+									cardCnt -= 1;
+									mainReinforce = null;
+									raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedMain = false;
+									raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = false;
+									raycastResult.gameObject.transform.parent.Find ("SelectedFrame").GetComponent<Image> ().enabled = false;
+									raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
+								}
+								else {
+									cardCnt -= 1;
+									raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedSub = false;
+									raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = false;
+									tempExp -= raycastResult.gameObject.GetComponentInParent<CardManager> ().maxExp / 4;
+									raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
+								}
+							}
+							print (cardCnt);
+							print (tempExp);
 						}
 					}
 				}
@@ -345,6 +384,7 @@ public class GameManager : BaseInputModule {
 	public override void Process() {}
 	protected override void OnEnable() {}
 	protected override void OnDisable() {}
+
 	public void BuyLowCard() {
 		rubble += 10000;
 		int tempTier = Random.Range (1, 1000 + 1);
@@ -454,6 +494,21 @@ public class GameManager : BaseInputModule {
 	}
 	public void OnReinforceCancel() {
 		isWaitingSelect = false;
+		for (int i = 0; i < transform.childCount; i++) {
+			if (transform.GetChild(i).GetComponent<CardManager>().isSelected) {
+				transform.GetChild (i).GetComponent<CardManager> ().isSelected = false;
+			}
+			if (transform.GetChild(i).GetComponent<CardManager>().isSelectedMain) {
+				transform.GetChild (i).GetComponent<CardManager> ().isSelectedMain = false;
+			}
+			if (transform.GetChild(i).GetComponent<CardManager>().isSelectedSub) {
+				transform.GetChild (i).GetComponent<CardManager> ().isSelectedSub = false;
+			}
+		}
+		mainReinforce.transform.Find ("SelectedFrame").GetComponent<Image> ().enabled = false;
+		mainReinforce = null;
+		cardCnt = 0;
+		tempExp = 0;
 		for (int i = 0; i < transform.childCount; i++) {
 			transform.GetChild (i).Find ("Alpha").GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
 		}

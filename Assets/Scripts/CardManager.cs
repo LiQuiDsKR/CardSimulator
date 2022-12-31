@@ -13,6 +13,7 @@ public class CardManager : MonoBehaviour {
 
 	public bool isSelectedMain = false;
 	public bool isSelectedSub = false;
+	public bool isSelected = false;
 
 	string path;
 	// Use this for initialization
