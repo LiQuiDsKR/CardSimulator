@@ -25,10 +25,11 @@ public class GameManager : BaseInputModule {
 
 	RaycastHit hit;
 
-	[SerializeField]
+	bool isReinforceMode = false;
+
 	int cardCnt = 0;
-	[SerializeField]
 	int tempExp = 0;
+
 	Dictionary <string, int> roleList = new Dictionary<string, int> () {
 		{ "마피아", 0 },
 		{ "스파이", 1 },
@@ -329,10 +330,8 @@ public class GameManager : BaseInputModule {
 					}
 					foreach (RaycastResult raycastResult in raycastResults) {
 						HandlePointerExitAndEnter(ped, raycastResult.gameObject);
-						print (raycastResult.gameObject.name);
 						if (raycastResult.gameObject.tag == "CardCollider") {
 							if (raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected == false) {
-								print ("Yes, isSelected == false");
 								if (cardCnt == 0) {
 									cardCnt += 1;
 									mainReinforce = raycastResult.gameObject.transform.parent.gameObject;
@@ -342,21 +341,32 @@ public class GameManager : BaseInputModule {
 									raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
 								}
 								else {
-									if (mainReinforce.GetComponent<CardManager> ().maxExp - (mainReinforce.GetComponent<CardManager> ().exp + tempExp) > 0) {
-										cardCnt += 1;
-										raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedSub = true;
-										raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = true;
-										tempExp += raycastResult.gameObject.GetComponentInParent<CardManager> ().maxExp / 4;
-										raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
+									if (mainReinforce.GetComponent<CardManager>().exp >= mainReinforce.GetComponent<CardManager>().maxExp) {
+										if (raycastResult.gameObject.GetComponentInParent<CardManager> ().role == mainReinforce.GetComponent<CardManager> ().role) {
+											if (raycastResult.gameObject.GetComponentInParent<CardManager> ().tier == mainReinforce.GetComponent<CardManager> ().tier) {
+												if (cardCnt < mainReinforce.GetComponent<CardManager> ().tier + 1) {
+													cardCnt += 1;
+													raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedSub = true;
+													raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = true;
+													tempExp += raycastResult.gameObject.GetComponentInParent<CardManager> ().maxExp / 4;
+													raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
+												}
+											}
+										}
 									} else {
-										print ("cant add");
+										if (mainReinforce.GetComponent<CardManager> ().maxExp - (mainReinforce.GetComponent<CardManager> ().exp + tempExp) > 0) {
+											cardCnt += 1;
+											raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedSub = true;
+											raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = true;
+											tempExp += raycastResult.gameObject.GetComponentInParent<CardManager> ().maxExp / 4;
+											raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
+										}
 									}
+
 								}
 							}
 							else {
-								print ("Yes, isSelected == true");
 								if (cardCnt == 1) {
-									print ("Yes, cardCnt == 1");
 									mainReinforce = null;
 									raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedMain = false;
 									raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = false;
@@ -365,7 +375,6 @@ public class GameManager : BaseInputModule {
 									cardCnt -= 1;
 								}
 								else {
-									print ("Yes, cardCnt != 1");
 									cardCnt -= 1;
 									raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedSub = false;
 									raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = false;
@@ -459,41 +468,81 @@ public class GameManager : BaseInputModule {
     }
 	public void CardSort() {
         // transform.SetSiblingIndex(0);
+		for (int j = 0; j < 32; j++) {
+			for (int i = 0; i < transform.childCount; i++) {
+				if (transform.GetChild(i).GetComponent<CardManager>().exp == j * 1000) {
+					transform.GetChild(i).SetSiblingIndex(0);
+				}
+			}
+		}
 		for (int j = 0; j < roleList.Count; j++) {
-            for (int i = 0; i < transform.childCount; i++) {
-                if (roleList[transform.GetChild(i).GetComponent<CardManager>().role] == j) {
-                    transform.GetChild(i).SetSiblingIndex(0);
-                }
-            }
-        }
+			for (int i = 0; i < transform.childCount; i++) {
+				if (roleList[transform.GetChild(i).GetComponent<CardManager>().role] == j) {
+					transform.GetChild(i).SetSiblingIndex(0);
+				}
+			}
+		}
 		for (int j = 1; j <= 6; j++) {
             for (int i = 0; i < transform.childCount; i++) {
                 if (transform.GetChild(i).GetComponent<CardManager>().tier == j) {
                     transform.GetChild(i).SetSiblingIndex(0);
                 }
             }
+
         }
         
     }
 
 	public void OnReinforce() {
-		if (!isWaitingSelect) {
-			isWaitingSelect = true;
-			for (int i = 0; i < transform.childCount; i++) {
-				transform.GetChild (i).Find ("Alpha").GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
+		if (!isReinforceMode) {
+			isReinforceMode = true;
+			if (!isWaitingSelect) {
+				isWaitingSelect = true;
+				for (int i = 0; i < transform.childCount; i++) {
+					transform.GetChild (i).Find ("Alpha").GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
+				}
+				GameObject.Find ("DarkEffect").GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
+				GameObject.Find ("BuyLowCard").GetComponent<Button> ().enabled = false;
+				GameObject.Find ("BuyLowCardpack").GetComponent<Button> ().enabled = false;
+				GameObject.Find ("BuyHighCard").GetComponent<Button> ().enabled = false;
+				GameObject.Find ("BuyHighCardpack").GetComponent<Button> ().enabled = false;
+				GameObject.Find ("SortButton").GetComponent<Button> ().enabled = false;
+				GameObject.Find ("ReinforceCancelButton").GetComponent<Image> ().enabled = true;
 			}
-			GameObject.Find ("DarkEffect").GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
-			GameObject.Find ("BuyLowCard").GetComponent<Button> ().enabled = false;
-			GameObject.Find ("BuyLowCardpack").GetComponent<Button> ().enabled = false;
-			GameObject.Find ("BuyHighCard").GetComponent<Button> ().enabled = false;
-			GameObject.Find ("BuyHighCardpack").GetComponent<Button> ().enabled = false;
-			GameObject.Find ("ReinforceButton").GetComponent<Button> ().enabled = false;
-			GameObject.Find ("SortButton").GetComponent<Button> ().enabled = false;
-			GameObject.Find ("ReinforceCancelButton").GetComponent<Image> ().enabled = true;
 		}
+		else {
+			if (mainReinforce.GetComponent<CardManager>().exp >= mainReinforce.GetComponent<CardManager>().maxExp) {
+				mainReinforce.GetComponent<CardManager> ().exp = 0;
+				cardCnt = 0;
+				tempExp = 0;
+				for (int i = 0; i < transform.childCount; i++) {
+					if (transform.GetChild(i).GetComponent<CardManager>().isSelectedSub == true) {
+						Destroy (transform.GetChild (i).gameObject);
+					}
+				}
+			}
+			else {
+				Mathf.Clamp (tempExp, 0, mainReinforce.GetComponent<CardManager> ().maxExp);
+				mainReinforce.GetComponent<CardManager> ().exp += tempExp;
+				cardCnt = 0;
+				tempExp = 0;
+				for (int i = 0; i < transform.childCount; i++) {
+					if (transform.GetChild(i).GetComponent<CardManager>().isSelectedSub == true) {
+						Destroy (transform.GetChild (i).gameObject);
+					}
+				}
+				if (mainReinforce != null) {
+					mainReinforce.transform.Find ("SelectedFrame").GetComponent<Image> ().enabled = false;
+				}
+				mainReinforce = null;
+
+			}
+		}
+
 	}
 	public void OnReinforceCancel() {
 		isWaitingSelect = false;
+		isReinforceMode = false;
 		for (int i = 0; i < transform.childCount; i++) {
 			if (transform.GetChild(i).GetComponent<CardManager>().isSelected) {
 				transform.GetChild (i).GetComponent<CardManager> ().isSelected = false;
