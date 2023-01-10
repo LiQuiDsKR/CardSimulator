@@ -329,12 +329,12 @@ public class GameManager : BaseInputModule {
 					}
 					foreach (RaycastResult raycastResult in raycastResults) {
 						HandlePointerExitAndEnter(ped, raycastResult.gameObject);
-
+						print (raycastResult.gameObject.name);
 						if (raycastResult.gameObject.tag == "CardCollider") {
 							if (raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected == false) {
+								print ("Yes, isSelected == false");
 								if (cardCnt == 0) {
 									cardCnt += 1;
-									print("newking");
 									mainReinforce = raycastResult.gameObject.transform.parent.gameObject;
 									raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedMain = true;
 									raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = true;
@@ -344,7 +344,6 @@ public class GameManager : BaseInputModule {
 								else {
 									if (mainReinforce.GetComponent<CardManager> ().maxExp - (mainReinforce.GetComponent<CardManager> ().exp + tempExp) > 0) {
 										cardCnt += 1;
-										print("newzeryo");
 										raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedSub = true;
 										raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = true;
 										tempExp += raycastResult.gameObject.GetComponentInParent<CardManager> ().maxExp / 4;
@@ -355,15 +354,18 @@ public class GameManager : BaseInputModule {
 								}
 							}
 							else {
+								print ("Yes, isSelected == true");
 								if (cardCnt == 1) {
-									cardCnt -= 1;
+									print ("Yes, cardCnt == 1");
 									mainReinforce = null;
 									raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedMain = false;
 									raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = false;
 									raycastResult.gameObject.transform.parent.Find ("SelectedFrame").GetComponent<Image> ().enabled = false;
 									raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
+									cardCnt -= 1;
 								}
 								else {
+									print ("Yes, cardCnt != 1");
 									cardCnt -= 1;
 									raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedSub = false;
 									raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = false;
@@ -371,8 +373,6 @@ public class GameManager : BaseInputModule {
 									raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
 								}
 							}
-							print (cardCnt);
-							print (tempExp);
 						}
 					}
 				}
@@ -505,7 +505,9 @@ public class GameManager : BaseInputModule {
 				transform.GetChild (i).GetComponent<CardManager> ().isSelectedSub = false;
 			}
 		}
-		mainReinforce.transform.Find ("SelectedFrame").GetComponent<Image> ().enabled = false;
+		if (mainReinforce != null) {
+			mainReinforce.transform.Find ("SelectedFrame").GetComponent<Image> ().enabled = false;
+		}
 		mainReinforce = null;
 		cardCnt = 0;
 		tempExp = 0;

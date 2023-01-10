@@ -4,7 +4,7 @@ timeCreated: 1671717403
 licenseType: Free
 TrueTypeFontImporter:
   serializedVersion: 4
-  fontSize: 16
+  fontSize: 300
   forceTextureCase: -2
   characterSpacing: 0
   characterPadding: 1
@@ -13,11 +13,11 @@ TrueTypeFontImporter:
   fontNames:
   - Noto Sans KR
   fallbackFontReferences:
-  - {fileID: 12800000, guid: ac0463b2b68bb7e46b4a7845a9783b0f, type: 3}
-  - {fileID: 12800000, guid: 915779d342e01874a89c5f2a9645a0d0, type: 3}
-  - {fileID: 12800000, guid: 6477a004587a7a54198a961f99d4a06e, type: 3}
-  - {fileID: 12800000, guid: 61d1813bf8f462b47a12e85770047fd5, type: 3}
-  - {fileID: 12800000, guid: 23ee34ddc5eba8b46ae1ab796e7fa78d, type: 3}
+  - {instanceID: 0}
+  - {instanceID: 0}
+  - {instanceID: 0}
+  - {instanceID: 0}
+  - {instanceID: 0}
   customCharacters: 
   fontRenderingMode: 0
   ascentCalculationMode: 1
