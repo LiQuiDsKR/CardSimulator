@@ -26,7 +26,7 @@ public class CardManager : MonoBehaviour {
 	void Update () {
 		
 	}
-	void GetImg() {
+	public void GetImg() {
 		transform.Find ("JobName").GetComponent<Text> ().text = role;
 
 		path = "JobIllustKR/" + role;
