@@ -21,6 +21,7 @@ public class GameManager : BaseInputModule {
 	Canvas canv;
 	GraphicRaycaster gr;
 	PointerEventData ped;
+	AudioSource audio;
 	List<RaycastResult> raycastResults;
 
 	RaycastHit hit;
@@ -244,6 +245,7 @@ public class GameManager : BaseInputModule {
 		canv = GameObject.Find("Canvas").GetComponent<Canvas>();
 		gr = canv.GetComponent<GraphicRaycaster> ();
 		ped = new PointerEventData (null);
+		audio = this.GetComponent<AudioSource> ();
 		raycastResults = new List<RaycastResult>();
 	}
 
@@ -516,6 +518,11 @@ public class GameManager : BaseInputModule {
 		else {
 			if (mainReinforce.GetComponent<CardManager>().exp >= mainReinforce.GetComponent<CardManager>().maxExp) {
 				mainReinforce.GetComponent<CardManager> ().exp = 0;
+				int[] cost = new int[6] {
+					0, 10000, 50000, 100000, 500000, 1000000
+				};
+				rubble += cost [mainReinforce.GetComponent<CardManager> ().tier];
+				RefreshUI ();
 				cardCnt = 0;
 				tempExp = 0;
 				mainReinforce.GetComponent<CardManager> ().tier += 1;
@@ -537,7 +544,7 @@ public class GameManager : BaseInputModule {
 						mainReinforce.GetComponent<CardManager> ().GetImg ();
 					}
 				}
-
+				audio.PlayOneShot (Resources.Load<AudioClip> ("SoundFX/tier_up"));
 				for (int i = 0; i < transform.childCount; i++) {
 					if (transform.GetChild(i).GetComponent<CardManager>().isSelectedSub == true) {
 						Destroy (transform.GetChild (i).gameObject);
@@ -554,8 +561,11 @@ public class GameManager : BaseInputModule {
 			else {
 				Mathf.Clamp (tempExp, 0, mainReinforce.GetComponent<CardManager> ().maxExp);
 				mainReinforce.GetComponent<CardManager> ().exp += tempExp;
+				rubble += tempExp;
+				RefreshUI ();
 				cardCnt = 0;
 				tempExp = 0;
+				audio.PlayOneShot (Resources.Load<AudioClip> ("SoundFX/experience_up"));
 				for (int i = 0; i < transform.childCount; i++) {
 					if (transform.GetChild(i).GetComponent<CardManager>().isSelectedSub == true) {
 						Destroy (transform.GetChild (i).gameObject);
