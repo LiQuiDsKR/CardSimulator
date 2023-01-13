@@ -561,7 +561,7 @@ public class GameManager : BaseInputModule {
 			else {
 				Mathf.Clamp (tempExp, 0, mainReinforce.GetComponent<CardManager> ().maxExp);
 				mainReinforce.GetComponent<CardManager> ().exp += tempExp;
-				rubble += tempExp;
+				rubble += cardCnt * 1000;
 				RefreshUI ();
 				cardCnt = 0;
 				tempExp = 0;
