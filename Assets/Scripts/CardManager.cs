@@ -18,8 +18,8 @@ public class CardManager : MonoBehaviour {
 	string path;
 	// Use this for initialization
 	void Start () {
-        GetImg();
-        maxExp = (int)(Mathf.Pow(2, tier - 1) * 1000f);
+		maxExp = (int)(Mathf.Pow(2, tier - 1) * 1000f);
+		GetImg();
 
     }
 	// Update is called once per frame
@@ -49,5 +49,13 @@ public class CardManager : MonoBehaviour {
 
 		path = "Duel4+/" + tiers [5];
 		transform.Find ("Tier6").GetComponent<Image> ().sprite = Resources.Load<Sprite> (path);
+
+		transform.Find ("ExpBar").GetComponent<RectTransform> ().sizeDelta = new Vector2((310 * ((float)exp / (float)maxExp)), transform.Find ("ExpBar").GetComponent<RectTransform> ().sizeDelta.y);
+		if (exp >= maxExp) {
+			transform.Find ("ExpBar").GetComponent<Image> ().color = new Color (0, 0.8f, 1.0f);
+		}
+		else {
+			transform.Find ("ExpBar").GetComponent<Image> ().color = new Color (1.0f, 0.7f, 0);
+		}
 	}
 }

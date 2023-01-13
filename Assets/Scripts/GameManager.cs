@@ -541,7 +541,6 @@ public class GameManager : BaseInputModule {
 							}
 						}
 						mainReinforce.GetComponent<CardManager>().tiers [mainReinforce.GetComponent<CardManager> ().tier - 1] = roleTo4Tier [i] [t4rnd];
-						mainReinforce.GetComponent<CardManager> ().GetImg ();
 					}
 				}
 				audio.PlayOneShot (Resources.Load<AudioClip> ("SoundFX/tier_up"));
@@ -556,6 +555,7 @@ public class GameManager : BaseInputModule {
 					mainReinforce.transform.Find ("Alpha").GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
 					mainReinforce.transform.Find ("SelectedFrame").GetComponent<Image> ().enabled = false;
 				}
+				mainReinforce.GetComponent<CardManager> ().GetImg ();
 				mainReinforce = null;
 			}
 			else {
@@ -577,11 +577,11 @@ public class GameManager : BaseInputModule {
 					mainReinforce.transform.Find ("Alpha").GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
 					mainReinforce.transform.Find ("SelectedFrame").GetComponent<Image> ().enabled = false;
 				}
-				mainReinforce = null;
 
+				mainReinforce.GetComponent<CardManager> ().GetImg ();
+				mainReinforce = null;
 			}
 		}
-
 	}
 	public void OnReinforceCancel() {
 		isWaitingSelect = false;
