@@ -416,7 +416,7 @@ public class GameManager : BaseInputModule {
 	}
 
 	void UpdateHandheld() {
-		if (Input.touchCount >= 0) {
+		if (Input.touchCount >= 1) {
 			if (Input.GetTouch (0).phase == TouchPhase.Began) {
 				firstScroll = GameObject.Find("Content").GetComponent<RectTransform>().position.y;
 			}
@@ -426,7 +426,7 @@ public class GameManager : BaseInputModule {
 		}
 
 		if (isWaitingSelect) {
-			if (Input.touchCount >= 0) {
+			if (Input.touchCount >= 1) {
 				if (Input.GetTouch (0).phase == TouchPhase.Ended) {
 					ped.position = Input.GetTouch(0).position;
 					gr.Raycast (ped, raycastResults);
@@ -435,7 +435,7 @@ public class GameManager : BaseInputModule {
 						foreach (RaycastResult raycastResult in raycastResults) {
 							HandlePointerExitAndEnter(ped, raycastResult.gameObject);
 							if (raycastResult.gameObject.tag == "CardCollider") {
-								if (Mathf.Abs (firstScroll - secondScroll) < 0.5f) {
+								//if (Mathf.Abs (firstScroll - secondScroll) < 0.5f) {
 									if (raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected == false) {
 										if (raycastResult.gameObject.GetComponentInParent<CardManager> ().tier != 6) {
 											if (cardCnt == 0) {
@@ -491,8 +491,7 @@ public class GameManager : BaseInputModule {
 											}
 										}
 									}
-								}
-
+								//}
 							}
 						}
 					}
