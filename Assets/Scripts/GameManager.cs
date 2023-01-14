@@ -416,82 +416,75 @@ public class GameManager : BaseInputModule {
 	}
 
 	void UpdateHandheld() {
-		if (Input.touchCount >= 1) {
-			if (Input.GetTouch (0).phase == TouchPhase.Began) {
-				firstScroll = GameObject.Find("Content").GetComponent<RectTransform>().position.y;
-			}
-			else if (Input.GetTouch (0).phase == TouchPhase.Ended) {
-				secondScroll = GameObject.Find("Content").GetComponent<RectTransform>().position.y;
-			}
+		if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began) {
+			firstScroll = GameObject.Find("Content").GetComponent<RectTransform>().position.y;
+		}
+		if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Ended) {
+			secondScroll = GameObject.Find("Content").GetComponent<RectTransform>().position.y;
 		}
 
 		if (isWaitingSelect) {
-			if (Input.touchCount >= 1) {
-				if (Input.GetTouch (0).phase == TouchPhase.Ended) {
-					ped.position = Input.GetTouch(0).position;
-					gr.Raycast (ped, raycastResults);
+			if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Ended) {
+				ped.position = Input.GetTouch(0).position;
+				gr.Raycast (ped, raycastResults);
 
-					if (raycastResults.Count > 0) {
-						foreach (RaycastResult raycastResult in raycastResults) {
-							HandlePointerExitAndEnter(ped, raycastResult.gameObject);
-							if (raycastResult.gameObject.tag == "CardCollider") {
-								//if (Mathf.Abs (firstScroll - secondScroll) < 0.5f) {
-									if (raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected == false) {
-										if (raycastResult.gameObject.GetComponentInParent<CardManager> ().tier != 6) {
-											if (cardCnt == 0) {
-												cardCnt += 1;
-												mainReinforce = raycastResult.gameObject.transform.parent.gameObject;
-												raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedMain = true;
-												raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = true;
-												raycastResult.gameObject.transform.parent.Find ("SelectedFrame").GetComponent<Image> ().enabled = true;
-												raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
-											}
-											else {
-												if (mainReinforce.GetComponent<CardManager>().exp >= mainReinforce.GetComponent<CardManager>().maxExp) {
-													if (raycastResult.gameObject.GetComponentInParent<CardManager> ().role == mainReinforce.GetComponent<CardManager> ().role) {
-														if (raycastResult.gameObject.GetComponentInParent<CardManager> ().tier == mainReinforce.GetComponent<CardManager> ().tier) {
-															if (cardCnt < mainReinforce.GetComponent<CardManager> ().tier + 1) {
-																cardCnt += 1;
-																raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedSub = true;
-																raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = true;
-																tempExp += raycastResult.gameObject.GetComponentInParent<CardManager> ().maxExp / 4;
-																raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
-															}
+				if (raycastResults.Count > 0) {
+					foreach (RaycastResult raycastResult in raycastResults) {
+						HandlePointerExitAndEnter (ped, raycastResult.gameObject);
+						if (raycastResult.gameObject.tag == "CardCollider") {
+							if (Mathf.Abs (firstScroll - secondScroll) < 0.5f) {
+								if (raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected == false) {
+									if (raycastResult.gameObject.GetComponentInParent<CardManager> ().tier != 6) {
+										if (cardCnt == 0) {
+											cardCnt += 1;
+											mainReinforce = raycastResult.gameObject.transform.parent.gameObject;
+											raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedMain = true;
+											raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = true;
+											raycastResult.gameObject.transform.parent.Find ("SelectedFrame").GetComponent<Image> ().enabled = true;
+											raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
+										} else {
+											if (mainReinforce.GetComponent<CardManager> ().exp >= mainReinforce.GetComponent<CardManager> ().maxExp) {
+												if (raycastResult.gameObject.GetComponentInParent<CardManager> ().role == mainReinforce.GetComponent<CardManager> ().role) {
+													if (raycastResult.gameObject.GetComponentInParent<CardManager> ().tier == mainReinforce.GetComponent<CardManager> ().tier) {
+														if (cardCnt < mainReinforce.GetComponent<CardManager> ().tier + 1) {
+															cardCnt += 1;
+															raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedSub = true;
+															raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = true;
+															tempExp += raycastResult.gameObject.GetComponentInParent<CardManager> ().maxExp / 4;
+															raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
 														}
 													}
-												} else {
-													if (mainReinforce.GetComponent<CardManager> ().maxExp - (mainReinforce.GetComponent<CardManager> ().exp + tempExp) > 0) {
-														cardCnt += 1;
-														raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedSub = true;
-														raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = true;
-														tempExp += raycastResult.gameObject.GetComponentInParent<CardManager> ().maxExp / 4;
-														raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
-													}
 												}
+											} else {
+												if (mainReinforce.GetComponent<CardManager> ().maxExp - (mainReinforce.GetComponent<CardManager> ().exp + tempExp) > 0) {
+													cardCnt += 1;
+													raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedSub = true;
+													raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = true;
+													tempExp += raycastResult.gameObject.GetComponentInParent<CardManager> ().maxExp / 4;
+													raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0f);
+												}
+											}
 
-											}
 										}
 									}
-									else {
-										if ((raycastResult.gameObject.GetComponentInParent<CardManager>().isSelectedMain && cardCnt == 1) || (!raycastResult.gameObject.GetComponentInParent<CardManager>().isSelectedMain)) {
-											if (cardCnt == 1) {
-												mainReinforce = null;
-												raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedMain = false;
-												raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = false;
-												raycastResult.gameObject.transform.parent.Find ("SelectedFrame").GetComponent<Image> ().enabled = false;
-												raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
-												cardCnt -= 1;
-											}
-											else {
-												cardCnt -= 1;
-												raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedSub = false;
-												raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = false;
-												tempExp -= raycastResult.gameObject.GetComponentInParent<CardManager> ().maxExp / 4;
-												raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
-											}
+								} else {
+									if ((raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedMain && cardCnt == 1) || (!raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedMain)) {
+										if (cardCnt == 1) {
+											mainReinforce = null;
+											raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedMain = false;
+											raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = false;
+											raycastResult.gameObject.transform.parent.Find ("SelectedFrame").GetComponent<Image> ().enabled = false;
+											raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
+											cardCnt -= 1;
+										} else {
+											cardCnt -= 1;
+											raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelectedSub = false;
+											raycastResult.gameObject.GetComponentInParent<CardManager> ().isSelected = false;
+											tempExp -= raycastResult.gameObject.GetComponentInParent<CardManager> ().maxExp / 4;
+											raycastResult.gameObject.GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
 										}
 									}
-								//}
+								}
 							}
 						}
 					}
