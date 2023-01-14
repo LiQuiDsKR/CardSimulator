@@ -336,8 +336,6 @@ public class GameManager : BaseInputModule {
 				gr.Raycast (ped, raycastResults);
 
 				if (raycastResults.Count > 0) {
-					for (int i = 0; i < raycastResults.Count; i++) {
-					}
 					foreach (RaycastResult raycastResult in raycastResults) {
 						HandlePointerExitAndEnter(ped, raycastResult.gameObject);
 						if (raycastResult.gameObject.tag == "CardCollider") {
