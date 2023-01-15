@@ -34,6 +34,7 @@ public class GameManager : BaseInputModule {
 	int cardCnt = 0;
 	int tempExp = 0;
 
+	string deviceInfo = "unknown";
 	Dictionary <string, int> roleList = new Dictionary<string, int> () {
 		{ "마피아", 0 },
 		{ "스파이", 1 },
@@ -324,16 +325,24 @@ public class GameManager : BaseInputModule {
 	}
 	// Update is called once per frame
 	void Update () {
-		if (SystemInfo.deviceType == DeviceType.Desktop) {
+		if (deviceInfo == "unknown") {
+			if (Input.GetMouseButton (0)) {
+				deviceInfo = "Desktop";
+			}
+			if (Input.touchCount >= 1) {
+				deviceInfo = "Mobile";
+			}
+		}
+		if (deviceInfo == "Desktop") {
 			UpdateDesktop ();
 		}
-		else if (SystemInfo.deviceType == DeviceType.Handheld) {
-			UpdateHandheld ();
+		else if (deviceInfo == "Moblie") {
+			UpdateMobile ();
 		}
-
 	}
 
 	void UpdateDesktop() {
+		GameObject.Find ("Log").GetComponent<Text> ().text = deviceInfo;
 		if (Input.GetMouseButtonDown(0)) {
 			firstScroll = GameObject.Find("Content").GetComponent<RectTransform>().position.y;
 		}
@@ -415,7 +424,8 @@ public class GameManager : BaseInputModule {
 		}
 	}
 
-	void UpdateHandheld() {
+	void UpdateMobile() {
+		GameObject.Find ("Log").GetComponent<Text> ().text = deviceInfo;
 		if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began) {
 			firstScroll = GameObject.Find("Content").GetComponent<RectTransform>().position.y;
 		}
