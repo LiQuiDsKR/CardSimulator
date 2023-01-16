@@ -1,5 +1,0 @@
-Web으로 실행했을때 터치로 인식하는건 없음.
-if input.touchcount >= 1 {
-	debug
-}
-했는데 안뜸

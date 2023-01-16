@@ -26,6 +26,14 @@ public class CardManager : MonoBehaviour {
 	void Update () {
 		
 	}
+
+	public void CardClick() {
+		if (GameObject.Find ("Content").GetComponent<GameManager> ().isWaitingSelect) {
+			GameObject.Find ("Content").GetComponent<GameManager> ().currentSelected = this.gameObject.transform.Find("Alpha").gameObject;
+			GameObject.Find ("Content").GetComponent<GameManager> ().justClicked = true;
+		}
+
+	}
 	public void GetImg() {
 		transform.Find ("JobName").GetComponent<Text> ().text = role;
 
