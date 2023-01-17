@@ -40,6 +40,11 @@ public class GameManager : BaseInputModule {
 	int selectedCardCnt = 0;
 	int tempExp = 0;
 
+	bool getCollection1 = false;
+	bool getCollection2 = false;
+
+	int cardSlotExpandCost = 100;
+
 	string deviceInfo = "unknown";
 	Dictionary <string, int> roleList = new Dictionary<string, int> () {
 		{ "마피아", 0 },
@@ -332,6 +337,59 @@ public class GameManager : BaseInputModule {
 	// Update is called once per frame
 	void Update () {
 		UpdateDesktop ();
+		RefreshUI ();
+		CollectionCheck ();
+	}
+
+	void CollectionCheck() {
+		if (!getCollection1) {
+			for (int i = 0; i < transform.childCount; i++) {
+				if (transform.GetChild (i).GetComponent<CardManager> ().tier == 6) {
+					getCollection1 = true;
+					GameObject.Find ("Collection1").GetComponent<Image> ().enabled = true;
+				}
+			}
+		}
+		if (!getCollection2) {
+			int mafia = 0;
+			int support = 0;
+			int police = 0;
+			int doctor = 0;
+			int special = 0;
+			int cultLeader = 0;
+
+			for (int i = 0; i < transform.childCount; i++) {
+				if (transform.GetChild (i).GetComponent<CardManager> ().tier == 6) {
+					if (transform.GetChild (i).GetComponent<CardManager> ().role == "마피아") {
+						mafia += 1;
+					} else if (transform.GetChild (i).GetComponent<CardManager> ().role == "경찰") {
+						police += 1;
+					} else if (transform.GetChild (i).GetComponent<CardManager> ().role == "자경단원") {
+						police += 1;
+					} else if (transform.GetChild (i).GetComponent<CardManager> ().role == "의사") {
+						doctor += 1;
+					} else if (transform.GetChild (i).GetComponent<CardManager> ().role == "교주") {
+						cultLeader += 1;
+					}
+					else {
+						for (int sup = 1; sup <= 8; sup++) {
+							if (roleList[transform.GetChild (i).GetComponent<CardManager> ().role] == sup) {
+								support += 1;
+							}
+						}
+						for (int spec = 13; spec <= 30; spec++) {
+							if (roleList[transform.GetChild (i).GetComponent<CardManager> ().role] == spec) {
+								special += 1;
+							}
+						}
+					}
+				}
+				if ((mafia >= 3) && (police >= 1) && (doctor >= 1) && (special >= 5) && (cultLeader >= 1)) {
+					getCollection2 = true;
+					GameObject.Find ("Collection2").GetComponent<Image> ().enabled = true;
+				}
+			}
+		}
 	}
 
 	void UpdateDesktop() {
@@ -401,6 +459,12 @@ public class GameManager : BaseInputModule {
 	protected override void OnEnable() {}
 	protected override void OnDisable() {}
 
+	public void CardSlotExpand() {
+		luna += cardSlotExpandCost;
+		cardSlotExpandCost += 100;
+		maxCardCnt += 10;
+	}
+
 	public void BuyLowCard() {
 		if (cardCnt + 1 <= maxCardCnt) {
 			rubble += 10000;
@@ -414,7 +478,6 @@ public class GameManager : BaseInputModule {
 			else {
 				randCard (1);
 			}
-			RefreshUI();
 		}
     }
 	public void BuyLowCardpack() {
@@ -422,7 +485,6 @@ public class GameManager : BaseInputModule {
 			for (int i = 1; i <= 10; i++) {
 				BuyLowCard();
 			}
-			RefreshUI();
 		}
     }
 	public void BuyHighCard() {
@@ -438,7 +500,6 @@ public class GameManager : BaseInputModule {
 			else {
 				randCard (3);
 			}
-			RefreshUI();
 		}
     }
 	public void BuyHighCardpack_Each() {
@@ -473,7 +534,6 @@ public class GameManager : BaseInputModule {
 				BuyHighCardpack_Each();
 			}
 			no4tier = true;
-			RefreshUI();
 		}
 
     }
@@ -536,7 +596,6 @@ public class GameManager : BaseInputModule {
 					0, 10000, 50000, 100000, 500000, 1000000
 				};
 				rubble += cost [mainReinforce.GetComponent<CardManager> ().tier];
-				RefreshUI ();
 				selectedCardCnt = 0;
 				tempExp = 0;
 				mainReinforce.GetComponent<CardManager> ().tier += 1;
@@ -576,7 +635,6 @@ public class GameManager : BaseInputModule {
 				Mathf.Clamp (tempExp, 0, mainReinforce.GetComponent<CardManager> ().maxExp);
 				mainReinforce.GetComponent<CardManager> ().exp += tempExp;
 				rubble += selectedCardCnt * 1000;
-				RefreshUI ();
 				selectedCardCnt = 0;
 				tempExp = 0;
 				audio.PlayOneShot (Resources.Load<AudioClip> ("SoundFX/experience_up"));
