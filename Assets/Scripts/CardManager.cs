@@ -58,8 +58,9 @@ public class CardManager : MonoBehaviour {
 		transform.Find ("Tier5").GetComponent<Image> ().sprite = Resources.Load<Sprite> (path);
 
 		path = "Duel4+/" + tiers [5];
-		transform.Find ("Tier6").GetComponent<Image> ().sprite = Resources.Load<Sprite> (path);
-
+		if (exp > maxExp) {
+			exp = maxExp;
+		}
 		transform.Find ("ExpBar").GetComponent<RectTransform> ().sizeDelta = new Vector2((310 * ((float)exp / (float)maxExp)), transform.Find ("ExpBar").GetComponent<RectTransform> ().sizeDelta.y);
 		if (exp >= maxExp) {
 			transform.Find ("ExpBar").GetComponent<Image> ().color = new Color (0, 0.8f, 1.0f);

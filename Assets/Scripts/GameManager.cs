@@ -24,13 +24,7 @@ public class GameManager : BaseInputModule {
 
 	public bool isWaitingSelect = false;
 
-	Canvas canv;
-	GraphicRaycaster gr;
-	PointerEventData ped;
 	AudioSource audio;
-	List<RaycastResult> raycastResults;
-
-	RaycastHit hit;
 
 	public float firstScroll;
 	public float secondScroll;
@@ -38,14 +32,12 @@ public class GameManager : BaseInputModule {
 	bool isReinforceMode = false;
 	[SerializeField]
 	int selectedCardCnt = 0;
-	int tempExp = 0;
+	public int tempExp = 0;
 
 	bool getCollection1 = false;
 	bool getCollection2 = false;
 
 	int cardSlotExpandCost = 100;
-
-	string deviceInfo = "unknown";
 	Dictionary <string, int> roleList = new Dictionary<string, int> () {
 		{ "마피아", 0 },
 		{ "스파이", 1 },
@@ -257,11 +249,7 @@ public class GameManager : BaseInputModule {
 	};
 	// Use this for initialization
 	void Start () {
-		canv = GameObject.Find("Canvas").GetComponent<Canvas>();
-		gr = canv.GetComponent<GraphicRaycaster> ();
-		ped = new PointerEventData (null);
 		audio = this.GetComponent<AudioSource> ();
-		raycastResults = new List<RaycastResult>();
 	}
 
 	void randCard (int cardTier) {
@@ -318,9 +306,11 @@ public class GameManager : BaseInputModule {
 		else {
 			if (roleNum <= 4175) {
 				_role = "악인";
+				_tiers [0] = "악행";
 			}
 			else {
 				_role = "시민";
+				_tiers [0] = "정의"; 
 			}
 		}
 		GameObject newcard = Instantiate (card, this.transform);
@@ -377,7 +367,7 @@ public class GameManager : BaseInputModule {
 								support += 1;
 							}
 						}
-						for (int spec = 13; spec <= 30; spec++) {
+						for (int spec = 13; spec <= 30; spec++) { // ####### 직업 개수가 바뀌게 된다면 수정 필요 #######
 							if (roleList[transform.GetChild (i).GetComponent<CardManager> ().role] == spec) {
 								special += 1;
 							}
@@ -591,67 +581,113 @@ public class GameManager : BaseInputModule {
 		}
 		else {
 			if (mainReinforce.GetComponent<CardManager>().exp >= mainReinforce.GetComponent<CardManager>().maxExp) {
-				mainReinforce.GetComponent<CardManager> ().exp = 0;
-				int[] cost = new int[6] {
-					0, 10000, 50000, 100000, 500000, 1000000
-				};
-				rubble += cost [mainReinforce.GetComponent<CardManager> ().tier];
-				selectedCardCnt = 0;
-				tempExp = 0;
-				mainReinforce.GetComponent<CardManager> ().tier += 1;
-				mainReinforce.GetComponent<CardManager> ().maxExp *= 2;
-				for (int i = 0; i < roleTo4Tier.Count; i++) {
-					if (roleTo4Tier [i] [0] == mainReinforce.GetComponent<CardManager>().role) {
-						bool duplCheckOK = false; // true = no duplication tier (ex. same tier in t4, t5)
-						int t4rnd = Random.Range (1, roleTo4Tier [i].Count);
-						while (duplCheckOK == false) {
-							duplCheckOK = true;
-							foreach (string tierName in mainReinforce.GetComponent<CardManager>().tiers) {
-								if (tierName == roleTo4Tier [i] [t4rnd]) {
-									duplCheckOK = false;
-									t4rnd = Random.Range (1, roleTo4Tier [i].Count);
+				int subCnt = 0;
+				for (int i = 0; i < transform.childCount; i++) {
+					if (transform.GetChild(i).GetComponent<CardManager>().isSelectedSub == true) {
+						subCnt += 1;
+					}
+				}
+				if (subCnt == mainReinforce.GetComponent<CardManager>().tier)  {
+					mainReinforce.GetComponent<CardManager> ().exp = 0;
+					int[] cost = new int[6] {
+						0, 10000, 50000, 100000, 500000, 1000000
+					};
+					rubble += cost [mainReinforce.GetComponent<CardManager> ().tier];
+					selectedCardCnt = 0;
+					tempExp = 0;
+					mainReinforce.GetComponent<CardManager> ().tier += 1;
+					mainReinforce.GetComponent<CardManager> ().maxExp *= 2;
+					if (mainReinforce.GetComponent<CardManager> ().tier >= 4) {
+						for (int i = 0; i < roleTo4Tier.Count; i++) {
+							if (roleTo4Tier [i] [0] == mainReinforce.GetComponent<CardManager> ().role) {
+								bool duplCheckOK = false; // true = no duplication tier (ex. same tier in t4, t5)
+								int t4rnd = Random.Range (1, roleTo4Tier [i].Count);
+								while (duplCheckOK == false) {
+									duplCheckOK = true;
+									foreach (string tierName in mainReinforce.GetComponent<CardManager>().tiers) {
+										if (tierName == roleTo4Tier [i] [t4rnd]) {
+											duplCheckOK = false;
+											t4rnd = Random.Range (1, roleTo4Tier [i].Count);
+										}
+									}
+								}
+								mainReinforce.GetComponent<CardManager> ().tiers [mainReinforce.GetComponent<CardManager> ().tier - 1] = roleTo4Tier [i] [t4rnd];
+							}
+						}
+					}
+					else {
+						if (mainReinforce.GetComponent<CardManager> ().tier == 2) {
+							if (mainReinforce.GetComponent<CardManager> ().role == "시민") {
+								int tempRole = Random.Range (10, 30 + 1);
+								foreach (KeyValuePair<string, int> current in roleList) { // Gen Role
+									if (tempRole == current.Value) {
+										mainReinforce.GetComponent<CardManager> ().role = current.Key;
+										mainReinforce.GetComponent<CardManager> ().tiers [1] = roleTo2Tier [current.Key];
+										break;
+									}
+								}
+							}
+							else if (mainReinforce.GetComponent<CardManager> ().role == "악인") {
+								int tempRole = Random.Range (0, 30 + 1);
+								foreach (KeyValuePair<string, int> current in roleList) { // Gen Role
+									if (tempRole == current.Value) {
+										mainReinforce.GetComponent<CardManager> ().role = current.Key;
+										mainReinforce.GetComponent<CardManager> ().tiers [1] = roleTo2Tier [current.Key];
+										break;
+									}
 								}
 							}
 						}
-						mainReinforce.GetComponent<CardManager>().tiers [mainReinforce.GetComponent<CardManager> ().tier - 1] = roleTo4Tier [i] [t4rnd];
+						else if (mainReinforce.GetComponent<CardManager> ().tier == 3) {
+							for (int i = 0; i < roleTo3Tier.Count; i++) {
+								if (roleTo3Tier [i] [0] == mainReinforce.GetComponent<CardManager> ().role) {
+									int t3rnd = Random.Range (1, roleTo3Tier [i].Count);
+									mainReinforce.GetComponent<CardManager> ().tiers [2] = roleTo3Tier [i] [t3rnd];
+								}
+							}
+						}
 					}
-				}
-				audio.PlayOneShot (Resources.Load<AudioClip> ("SoundFX/tier_up"));
-				for (int i = 0; i < transform.childCount; i++) {
-					if (transform.GetChild(i).GetComponent<CardManager>().isSelectedSub == true) {
-						Destroy (transform.GetChild (i).gameObject);
+					audio.PlayOneShot (Resources.Load<AudioClip> ("SoundFX/tier_up"));
+					for (int i = 0; i < transform.childCount; i++) {
+						if (transform.GetChild(i).GetComponent<CardManager>().isSelectedSub == true) {
+							Destroy (transform.GetChild (i).gameObject);
+						}
 					}
+					if (mainReinforce != null) {
+						mainReinforce.GetComponent<CardManager> ().isSelectedMain = false;
+						mainReinforce.GetComponent<CardManager> ().isSelected = false;
+						mainReinforce.transform.Find ("Alpha").GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
+						mainReinforce.transform.Find ("SelectedFrame").GetComponent<Image> ().enabled = false;
+					}
+					mainReinforce.GetComponent<CardManager> ().GetImg ();
+					mainReinforce = null;
 				}
-				if (mainReinforce != null) {
-					mainReinforce.GetComponent<CardManager> ().isSelectedMain = false;
-					mainReinforce.GetComponent<CardManager> ().isSelected = false;
-					mainReinforce.transform.Find ("Alpha").GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
-					mainReinforce.transform.Find ("SelectedFrame").GetComponent<Image> ().enabled = false;
-				}
-				mainReinforce.GetComponent<CardManager> ().GetImg ();
-				mainReinforce = null;
+
 			}
 			else {
 				Mathf.Clamp (tempExp, 0, mainReinforce.GetComponent<CardManager> ().maxExp);
-				mainReinforce.GetComponent<CardManager> ().exp += tempExp;
-				rubble += selectedCardCnt * 1000;
-				selectedCardCnt = 0;
-				tempExp = 0;
-				audio.PlayOneShot (Resources.Load<AudioClip> ("SoundFX/experience_up"));
-				for (int i = 0; i < transform.childCount; i++) {
-					if (transform.GetChild(i).GetComponent<CardManager>().isSelectedSub == true) {
-						Destroy (transform.GetChild (i).gameObject);
+				if (tempExp > 0) {
+					mainReinforce.GetComponent<CardManager> ().exp += tempExp;
+					rubble += selectedCardCnt * 1000;
+					selectedCardCnt = 0;
+					tempExp = 0;
+					audio.PlayOneShot (Resources.Load<AudioClip> ("SoundFX/experience_up"));
+					for (int i = 0; i < transform.childCount; i++) {
+						if (transform.GetChild(i).GetComponent<CardManager>().isSelectedSub == true) {
+							Destroy (transform.GetChild (i).gameObject);
+						}
 					}
-				}
-				if (mainReinforce != null) {
-					mainReinforce.GetComponent<CardManager> ().isSelectedMain = false;
-					mainReinforce.GetComponent<CardManager> ().isSelected = false;
-					mainReinforce.transform.Find ("Alpha").GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
-					mainReinforce.transform.Find ("SelectedFrame").GetComponent<Image> ().enabled = false;
+					if (mainReinforce != null) {
+						mainReinforce.GetComponent<CardManager> ().isSelectedMain = false;
+						mainReinforce.GetComponent<CardManager> ().isSelected = false;
+						mainReinforce.transform.Find ("Alpha").GetComponent<Image> ().color = new Color (0, 0, 0, 0.5f);
+						mainReinforce.transform.Find ("SelectedFrame").GetComponent<Image> ().enabled = false;
+					}
+
+					mainReinforce.GetComponent<CardManager> ().GetImg ();
+					mainReinforce = null;
 				}
 
-				mainReinforce.GetComponent<CardManager> ().GetImg ();
-				mainReinforce = null;
 			}
 		}
 	}
