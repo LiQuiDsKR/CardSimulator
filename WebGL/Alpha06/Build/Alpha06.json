@@ -1,0 +1,11 @@
+{
+"companyName": "남자분",
+"productName": "자분닷컴",
+"dataUrl": "Alpha06.data.unityweb",
+"asmCodeUrl": "Alpha06.asm.code.unityweb",
+"asmMemoryUrl": "Alpha06.asm.memory.unityweb",
+"asmFrameworkUrl": "Alpha06.asm.framework.unityweb",
+"TOTAL_MEMORY": 268435456,
+"splashScreenStyle": "Dark",
+"backgroundColor": "#000000"
+}
