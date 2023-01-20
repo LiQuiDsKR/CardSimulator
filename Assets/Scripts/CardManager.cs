@@ -58,6 +58,8 @@ public class CardManager : MonoBehaviour {
 		transform.Find ("Tier5").GetComponent<Image> ().sprite = Resources.Load<Sprite> (path);
 
 		path = "Duel4+/" + tiers [5];
+		transform.Find ("Tier6").GetComponent<Image> ().sprite = Resources.Load<Sprite> (path);
+
 		if (exp > maxExp) {
 			exp = maxExp;
 		}
