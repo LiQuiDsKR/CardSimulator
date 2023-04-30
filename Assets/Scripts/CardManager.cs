@@ -42,6 +42,9 @@ public class CardManager : MonoBehaviour {
 		path = "JobIllustKR/" + role;
 		transform.Find ("JobIllust").GetComponent<Image> ().sprite = Resources.Load<Sprite> (path);
 
+		path = "JobThumb/" + role;
+		transform.Find ("TierFrame").transform.Find("JobThumb").GetComponent<Image> ().sprite = Resources.Load<Sprite> (path);
+
 		path = "UI/" + "frame" + (tier + "");
 		transform.Find ("CardFrame").GetComponent<Image> ().sprite = Resources.Load<Sprite> (path);
 
