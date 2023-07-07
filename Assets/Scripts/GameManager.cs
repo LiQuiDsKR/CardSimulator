@@ -38,6 +38,12 @@ public class GameManager : BaseInputModule {
 	bool getCollection2 = false;
 
 	int cardSlotExpandCost = 100;
+
+
+	// update role
+	int supportCnt = 8;
+	int specialCnt = 19;
+
 	Dictionary <string, int> roleList = new Dictionary<string, int> () {
 		{ "마피아", 0 },
 		{ "스파이", 1 },
@@ -70,8 +76,9 @@ public class GameManager : BaseInputModule {
 		{ "심리학자",28 },
 		{ "용병",29 },
 		{ "공무원",30 },
-		{ "시민", 31},
-		{ "교주",32 }
+		{ "비밀결사",31 },
+		{ "시민", 32},
+		{ "교주",33 }
 	};
 
 	Dictionary <string, string> roleTo1Tier = new Dictionary<string, string> () {
@@ -106,6 +113,7 @@ public class GameManager : BaseInputModule {
 		{ "심리학자","정의" },
 		{ "용병","정의" },
 		{ "공무원","정의" },
+		{ "비밀결사","정의" },
 		{ "시민","정의" },
 		{ "교주","악행" }
 	};
@@ -142,11 +150,13 @@ public class GameManager : BaseInputModule {
 		{ "심리학자","관찰" },
 		{ "용병","의뢰" },
 		{ "공무원","조회" },
+		{ "비밀결사","밀사" },
 		{ "시민","무능력" },
 		{ "교주","포교" }
 	};
-
+		
 	Dictionary <string, int> rolePercent = new Dictionary<string, int> () {
+		/*
 		{ "마피아", 2500 },
 		{ "스파이", 2604 },
 		{ "짐승인간", 2708 },
@@ -177,7 +187,7 @@ public class GameManager : BaseInputModule {
 		{ "심리학자",8695 },
 		{ "용병",8926 },
 		{ "공무원",9157 },
-		{ "교주",10000 }
+		{ "교주",10000 }*/
 	};
 
 	List <List<string>> roleTo3Tier = new List<List<string>> () {
@@ -211,6 +221,7 @@ public class GameManager : BaseInputModule {
 		new List<string> { "심리학자", "열정", "냉정", "달변", "숙련", "탐욕", "고무", "쇼맨십", "보험" },
 		new List<string> { "용병", "열정", "냉정", "달변", "숙련", "탐욕", "고무", "쇼맨십", "보험" },
 		new List<string> { "공무원", "열정", "냉정", "달변", "숙련", "탐욕", "고무", "쇼맨십", "보험" },
+		new List<string> { "비밀결사", "열정", "냉정", "달변", "숙련", "탐욕", "고무", "쇼맨십", "보험" },
 		new List<string> { "교주", "열정", "냉정", "달변", "숙련", "탐욕", "고무", "쇼맨십", "보험" }
 	};
 
@@ -245,11 +256,55 @@ public class GameManager : BaseInputModule {
 		new List<string> {"심리학자", "지박령", "도주", "배심원", "결백", "확성기", "독심술", "유언", "위증", "유품", "정보원", "프로파일링"},
 		new List<string> {"용병", "지박령", "도주", "배심원", "결백", "확성기", "독심술", "유언", "위증", "유품", "정보원", "추적", "결사"},
 		new List<string> {"공무원", "지박령", "도주", "배심원", "결백", "확성기", "독심술", "유언", "위증", "유품", "정보원", "색출"},
+		new List<string> {"비밀결사", "지박령", "도주", "배심원", "결백", "확성기", "독심술", "유언", "위증", "유품", "정보원", "검시", "표식"},
 		new List<string> {"교주", "지박령", "도주", "배심원", "결백", "확성기", "독심술", "유언", "위증", "시한부", "암구호", "설파"},
 	};
 	// Use this for initialization
 	void Start () {
+
+		int mafiaPercent = 10000 / 12 * 3;
+		int supportPercent = (10000 / 12) / supportCnt;
+		int policePercent = (10000 / 12) / 2;
+		int doctorPercent = 10000 / 12;
+		int specialPercent = ((10000 / 12) * 5) / specialCnt;
+
+		print (mafiaPercent);
+		print (supportPercent);
+		print (policePercent);
+		print (doctorPercent);
+		print (specialPercent);
+
 		audio = this.GetComponent<AudioSource> ();
+		int currentPercent = 0;
+		for (int i = 0; i < 1; i++) {
+			currentPercent += mafiaPercent;
+			rolePercent.Add (roleTo3Tier [i] [0], currentPercent);
+		}
+		for (int i = 1; i < 1 + supportCnt; i++) { // 1 : mafia
+			currentPercent += supportPercent;
+			rolePercent.Add (roleTo3Tier [i] [0], currentPercent);
+		}
+		for (int i = 1 + supportCnt; i < 1 + supportCnt + 2; i++) { // 2 : police, vigilante
+			currentPercent += policePercent;
+			rolePercent.Add (roleTo3Tier [i] [0], currentPercent);
+		}
+		for (int i = 1 + supportCnt + 2; i < 1 + supportCnt + 2 + 1; i++) { // 1 : doctor
+			currentPercent += doctorPercent;
+			rolePercent.Add (roleTo3Tier [i] [0], currentPercent);
+		}
+		for (int i = 1 + supportCnt + 2 + 1; i < 1 + supportCnt + 2 + 1 + specialCnt; i++) {
+			currentPercent += specialCnt;
+			rolePercent.Add (roleTo3Tier [i] [0], currentPercent);
+		}
+		rolePercent.Add ("교주", 10000);
+
+		foreach (string Key in rolePercent.Keys) {
+			print(Key);  
+		}
+
+		foreach (int Val in rolePercent.Values) {
+			print(Val);  
+		}
 	}
 
 	void randCard (int cardTier) {
@@ -367,7 +422,7 @@ public class GameManager : BaseInputModule {
 								support += 1;
 							}
 						}
-						for (int spec = 13; spec <= 30; spec++) { // ####### 직업 개수가 바뀌게 된다면 수정 필요 #######
+						for (int spec = 13; spec <= 31; spec++) { // ####### 직업 개수가 바뀌게 된다면 수정 필요 #######
 							if (roleList[transform.GetChild (i).GetComponent<CardManager> ().role] == spec) {
 								special += 1;
 							}
