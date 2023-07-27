@@ -293,7 +293,7 @@ public class GameManager : BaseInputModule {
 			rolePercent.Add (roleTo3Tier [i] [0], currentPercent);
 		}
 		for (int i = 1 + supportCnt + 2 + 1; i < 1 + supportCnt + 2 + 1 + specialCnt; i++) {
-			currentPercent += specialCnt;
+			currentPercent += specialPercent;
 			rolePercent.Add (roleTo3Tier [i] [0], currentPercent);
 		}
 		rolePercent.Add ("교주", 10000);
