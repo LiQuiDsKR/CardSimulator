@@ -429,7 +429,7 @@ public class GameManager : BaseInputModule {
 						}
 					}
 				}
-				if ((mafia >= 3) && (police >= 1) && (doctor >= 1) && (special >= 5) && (cultLeader >= 1)) {
+				if ((mafia >= 3) && (support >= 1) && (police >= 1) && (doctor >= 1) && (special >= 5) && (cultLeader >= 1)) {
 					getCollection2 = true;
 					GameObject.Find ("Collection2").GetComponent<Image> ().enabled = true;
 				}
